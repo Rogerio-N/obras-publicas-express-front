@@ -4,7 +4,7 @@ let canLogin = true;
 function Runner(){
     
     sessionStorage.setItem("isLoged",false);
-    let rawData = getThemes(`http://localhost:3000/themes/`);
+    let rawData = getThemes(`${API_URL}/themes/find/active/true`);
     let themes = JSON.parse(rawData);
 
     let themeDisplay = document.getElementById("Theme-display");
@@ -18,13 +18,13 @@ function Runner(){
         imgDiv.className = "imgDiv";
 
         let themeImg = document.createElement("img");
-        themeImg.src = theme.photo;
+        themeImg.src = theme.url;
 
         let nameDiv = document.createElement("div");
         nameDiv.className = "nameDiv";
 
         let themeName = document.createElement("h3");
-        themeName.innerHTML = theme.name;
+        themeName.innerHTML = theme.nome;
 
         imgDiv.appendChild(themeImg);
         nameDiv.appendChild(themeName);
@@ -54,7 +54,7 @@ function loginChecker(){
     waitSearch(loginAttempts, 5)
     loginAttempts ++;
     if(loginAttempts >=6){return loginAttempts = 0}
-    let user = login(`${API_URL}/login`,data);
+    let user = login(`${API_URL}/users/login`,data);
     if(user.length==0){
         return alert("Usuário não encontrado, insira novamente as informações");
     }
