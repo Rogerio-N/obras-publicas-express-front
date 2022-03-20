@@ -1,6 +1,6 @@
 //https://obras-publicas-prod.herokuapp.com
 //https://obras-publicas-qa.herokuapp.com
-const API_URL = "https://obras-publicas-prod.herokuapp.com";
+const API_URL = "https://obras-publicas-qa.herokuapp.com";
 var token = sessionStorage.getItem("Token")
 
 if( (window.location.pathname != "/" && window.location.pathname != "/cadastro") && token == null){
