@@ -6,10 +6,9 @@ function Runner(){
     sessionStorage.setItem("isLoged",false);
     let rawData = getThemes(`${API_URL}/themes/find/active/true`);
     let themes = JSON.parse(rawData);
-
     let themeDisplay = document.getElementById("Theme-display");
 
-    themes.forEach(theme => {
+    themes.Content.forEach(theme => {
         
         let themeDiv = document.createElement("div");
         themeDiv.className = "Theme";
@@ -48,17 +47,17 @@ function loginChecker(){
 
     let data = {
         "email": currentUserMail,
-        "password": currentUserPassword
+        "senha": currentUserPassword
     }
-    
     waitSearch(loginAttempts, 5)
     loginAttempts ++;
     if(loginAttempts >=6){return loginAttempts = 0}
-    let user = login(`${API_URL}/users/login`,data);
-    if(user.length==0){
-        return alert("Usuário não encontrado, insira novamente as informações");
+    let rawUser = login(`${API_URL}/users/login`,data);
+    let user = JSON.parse(rawUser)
+    if(user.Status != 200){
+        return alert(user.Content[0].Mensagem)
     }
-    redirect("./home");
-    sessionStorage.setItem("Token",user)
+    sessionStorage.setItem("Token",user.message)
     sessionStorage.setItem("isLoged",true)
+    redirect("/home");
 };

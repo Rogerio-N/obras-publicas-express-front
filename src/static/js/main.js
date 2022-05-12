@@ -1,5 +1,6 @@
 //https://obras-publicas-prod.herokuapp.com
 //https://obras-publicas-qa.herokuapp.com
+//http://localhost:3000
 const API_URL = "https://obras-publicas-qa.herokuapp.com";
 var token = sessionStorage.getItem("Token")
 
@@ -13,8 +14,9 @@ function redirect(path = "/"){
 }
 
 function getUserData(){
-    let userEmail = parseJwt(token).sub;
-    return JSON.parse(get(`${API_URL}/api/v2/users/find?email=${userEmail}`,token));
+    let userEmail = parseJwt(token).userEmail;
+    
+    return JSON.parse(get(`${API_URL}/users/find/email/${userEmail}`,token));
 }
 
 function parseJwt(token){
@@ -28,24 +30,18 @@ function parseJwt(token){
 
 }
 
-function post(url,data,path){
+function post(url,data){
     let request = new XMLHttpRequest();
     request.open("POST",url,false);
-    request.setRequestHeader("Content-type", "application/json");
-    request.setRequestHeader("permissions-policy","interest-cohort=()");
     request.send(JSON.stringify(data));
-    request.onloadend = redirect(path);
     return request.responseText;
 }
 
-function sendComplaint(url,data,path){
+function sendComplaint(url,data){
     let request = new XMLHttpRequest();
     request.open("POST",url,false);
-    request.setRequestHeader("Content-type", "application/json");
-    request.setRequestHeader("permissions-policy","interest-cohort=()");
-    request.setRequestHeader("Authorization",`Bearer ${token}`);
+    request.setRequestHeader("x-access-token",`${token}`);
     request.send(JSON.stringify(data));
-    request.onloadend = redirect(path);
     return request.responseText;
 }
 
@@ -72,10 +68,10 @@ function getThemes(url){
     return request.responseText;
 };
 
-function get(url,token = ""){
+function get(url,token){
     let request = new XMLHttpRequest();
     request.open("GET",url,false);
-    request.setRequestHeader("Authorization",`Bearer ${token}`);
+    request.setRequestHeader("x-access-token",token);
     request.send();
     return request.responseText;
 };

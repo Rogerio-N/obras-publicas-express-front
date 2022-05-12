@@ -1,11 +1,16 @@
 import express from 'express'
 import path from 'path'
+import bodyParser from 'body-parser'
 
 const app = new express();
 
 const port = process.env.PORT || 3001;
 
 app.use(express.static('./src/static/'))
+
+app.use(bodyParser.json());
+app.use(bodyParser.text());
+app.use(bodyParser.urlencoded({extended:true}));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(path.resolve())+'/index.html')

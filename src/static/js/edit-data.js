@@ -1,13 +1,8 @@
 function put(url,data,token){
     let request = new XMLHttpRequest();
     request.open("PUT",url,true);
-    request.setRequestHeader("Content-type", "application/json");
-    request.setRequestHeader("Authorization",`Bearer ${token}`)
+    request.setRequestHeader("x-access-token",token);
     request.send(JSON.stringify(data));
-    request.onloadend = function redirect(){
-        alert("Para as alterações terem efeito, por favor faça login novamente");
-        window.location.href = "/";
-    }
     return request.responseText;
 }
 
@@ -23,12 +18,18 @@ function updateData(){
     let load = document.getElementById('load-handler');
     if(password != confPassword){return alert("As senhas não coincidem")}
 
+    let userData = getUserData().Content[0];
+
     const data = {
-        "name":newName,
+        "nome":newName,
         "email":newEmail,
-        "password":password
+        "senha":password,
+        "role": userData.role
     }
     load.style.display = "block";
-    put(`${API_URL}/api/v2/users/update/?id=${getUserData().id}`,data,token);
-    
+    let userDataRequest = put(`${API_URL}/users/update/all/${userData.id}`,data,token);
+    userDataRequest = JSON.parse(userDataRequest);
+    if(userDataRequest.Status != 200){
+        return alert(userDataRequest.Content[0].Menssagem)
+    }
 }
