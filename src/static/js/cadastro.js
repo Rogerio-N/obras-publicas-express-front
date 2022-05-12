@@ -4,7 +4,7 @@ function redirect(){
 
 function createUser(){
     event.preventDefault();
-    let url = `${API_URL}/api/v2/users`;
+    let url = `${API_URL}/users/create`;
     let email = document.getElementById("emaill").value;
     let name = document.getElementById("namee").value;
     var load = document.getElementById("load-handler");
@@ -21,14 +21,22 @@ function createUser(){
     }
 
     if(!canCreate){
-        alert("Verifique as informações e as insira novamente");
-    }else{
-        dados={
-            "email":email,
-            "password": password,
-            "name":name 
-        }
-        load.style.display = "block";
-        post(url,dados,token);
+        return alert("Verifique as informações e as insira novamente");
     }
+    
+    dados={
+        "email":email,
+        "senha": password,
+        "nome":name,
+        "role": "common"
+    }
+    
+    load.style.display = "block";
+    let userCreation = post(url,dados);
+    userCreation = JSON.parse(userCreation)
+    if(userCreation.Status != 200){
+        load.style.display = "none";
+        return alert(userCreation.Content[0].Mensagem)
+    }
+    redirect("/")
 }

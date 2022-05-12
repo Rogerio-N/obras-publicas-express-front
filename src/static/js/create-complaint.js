@@ -37,39 +37,43 @@ function createComplaint(){
         "type": "base64"
     }
     loader.style.display = "block";
-    imgurResponse = postImgur("https://api.imgur.com/3/image",imgurData,"6938311787a8442");
+    imgurResponse = postImgur("https://api.imgur.com/3/image",imgurData,"805bdac1a4e7b95");
     imgurResponse = JSON.parse(imgurResponse)
     if(!imgurResponse.success){
         alert("Algo deu errado, por favor tente novamente mais tarde")
         return redirect("/home")
     }
     let imgLink = imgurResponse.data.link
-    let currentUser = getUserData().id;
+    let currentUser = userData.Content[0].id;
     const complaintData = {
-        "themes": parseInt(complaintType),
+        "idTheme": parseInt(complaintType),
         "status": "Aguardando resposta",
         "descricao": description,
         "numero": addressNumber,
-        "endereco": `${street}, ${neighborhood}`,
-        "dataEnvio": sendDate,
-        "dataFim": endDate,
+        "rua": street,
+        "bairro": neighborhood,
+        "dataDenuncia": sendDate,
+        "dataFinalizacao": endDate,
         "cep":cep,
-        "user": currentUser,
+        "idUser": currentUser,
         "imageUrl": imgLink
     }
 
-    sendComplaint(`${API_URL}/api/v2/complaint`,complaintData);
-    window.location.href = "./home";
+    let sendComplaintRaw = sendComplaint(`${API_URL}/complaints/create`,complaintData);
+    sendComplaintRaw = JSON.parse(sendComplaintRaw)
+    if(sendComplaintRaw.Status != 200){return alert(sendComplaintRaw.Content[0].Mensagem)}
+    redirect('/home')
     
-    }  
+}  
+
+const userData = getUserData();
         
 function userDataShow(){
-    const userData = getUserData();
-    document.getElementById("Name-desktop").placeholder = userData.name;
-    document.getElementById("Email-desktop").placeholder = userData.email;
+    document.getElementById("Name-desktop").placeholder =userData.Content[0].nome;
+    document.getElementById("Email-desktop").placeholder = userData.Content[0].email;
 
-    document.getElementById("Name-cellphone").placeholder =  userData.name;
-    document.getElementById("Email-cellphone").placeholder = userData.email;
+    document.getElementById("Name-cellphone").placeholder =  userData.Content[0].nome;
+    document.getElementById("Email-cellphone").placeholder = userData.Content[0].email;
 
     document.getElementById("Complaint-counter-desktop").placeholder = sessionStorage.getItem("QtdComplaint");
     document.getElementById("Complaint-counter-cellphone").placeholder = sessionStorage.getItem("QtdComplaint");
@@ -79,13 +83,13 @@ function insertThemes(){
     
     let themeSelector = document.getElementById("Type-selector");
 
-    let allThemes = getThemes(`${API_URL}/api/v2/themes`);
+    let allThemes = getThemes(`${API_URL}/themes/find/active/true`);
     allThemes = JSON.parse(allThemes)
 
-    allThemes.forEach(theme => {
+    allThemes.Content.forEach(theme => {
         let themeId = theme.id;
         
-        let themeName = theme.name
+        let themeName = theme.nome
         let themeHolder = document.createElement("option")
         themeHolder.innerHTML = themeName;
         themeHolder.value = themeId;

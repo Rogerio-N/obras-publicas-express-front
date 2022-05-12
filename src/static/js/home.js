@@ -1,32 +1,35 @@
 let searchAttempts = 0;
+const userData = getUserData();
 
 function userDataShow(){
-    const userData = getUserData();
-    document.getElementById("Name-desktop").placeholder =userData.name;
-    document.getElementById("Email-desktop").placeholder = userData.email;
+    document.getElementById("Name-desktop").placeholder =userData.Content[0].nome;
+    document.getElementById("Email-desktop").placeholder = userData.Content[0].email;
 
-    document.getElementById("Name-cellphone").placeholder =  userData.name;
-    document.getElementById("Email-cellphone").placeholder = userData.email;
+    document.getElementById("Name-cellphone").placeholder =  userData.Content[0].nome;
+    document.getElementById("Email-cellphone").placeholder = userData.Content[0].email;
 }
 
 userDataShow();
 
 function complaintInsert(){
-    let rawData = get(`${API_URL}/api/v2/complaint/find/userComplaint?user_id=${getUserData().id}`,token);
+    let rawData = get(`${API_URL}/complaints/find/all/${userData.Content[0].id}`,token);
     let allUserComplaint = JSON.parse(rawData);
-    if(allUserComplaint.length == 0){return sessionStorage.setItem("QtdComplaint",0)}
+    if(allUserComplaint.Status != 200){
+        sessionStorage.setItem("QtdComplaint",0)
+        return alert(allUserComplaint.Content[0].Mensagem)
+    }
 
     let table = document.getElementById("History-table");
     var qtdComplaint = 0;
 
-    allUserComplaint.forEach(complaint => {
+    allUserComplaint.Content.forEach(complaint => {
         
         let row = document.createElement("tr");
         row.className = "allUserComplaint";
         row.id = complaint.id;
 
         let dateSend = document.createElement("td");
-        let dataSendPrep = new Date(complaint.dataEnvio);
+        let dataSendPrep = new Date(complaint.datadenuncia);
         let fullSendDate = `${dataSendPrep.getDate()}/${dataSendPrep.getMonth()}/${dataSendPrep.getFullYear()}`;
         dateSend.innerHTML = fullSendDate;
 
@@ -38,7 +41,7 @@ function complaintInsert(){
         org.innerHTML = "SISEP"
 
         let dateEnd = document.createElement("td");
-        let dataEndPrep = new Date(complaint.dataFim);
+        let dataEndPrep = new Date(complaint.datafinalizacao);
         let fullEndDate = `${dataEndPrep.getDate()}/${dataEndPrep.getMonth()}/${dataEndPrep.getFullYear()}`;
         dateEnd.innerHTML = fullEndDate;
 
@@ -89,11 +92,10 @@ function searchComplaint(){
     waitSearch(searchAttempts,5);
     searchAttempts++;
     if(searchAttempts>=6){return searchAttempts = 0;}
-    let params = `?user_id=${getUserData().id}&complaint_id=${currentComplaintProtocol}`;
-    let rawData = get(`${API_URL}/api/v2/complaint/find/userSpecificComplaint${params}`,token);
+    let rawData = get(`${API_URL}/complaints/find/one/${userData.Content[0].id}/${currentComplaintProtocol}`,token);
     //Nenhuma denuncia
-    if (rawData.length==0){return alert("Nenhuma denuncia foi encontrada com esse numero de protocolo")}
     let Complaint = JSON.parse(rawData);
+    if (Complaint.Status!=200){return alert(Complaint.Content[0].Mensagem)}
     cleanQuery();
     let table = document.getElementById("History-table");
     let oldDivs = document.getElementsByClassName("allUserComplaint");
@@ -105,23 +107,23 @@ function searchComplaint(){
     let row = document.createElement("tr");
     row.className = "currentComplaint";
     let dateSend = document.createElement("td");
-    let dataSendPrep = new Date(Complaint.dataEnvio);
+    let dataSendPrep = new Date(Complaint.Content[0].datadenuncia);
     let fullSendDate = `${dataSendPrep.getDate()}/${dataSendPrep.getMonth()}/${dataSendPrep.getFullYear()}`;
     dateSend.innerHTML = fullSendDate;
 
     let protocol = document.createElement("td");
-    protocol.innerHTML = Complaint.id;
+    protocol.innerHTML = Complaint.Content[0].id;
 
     let org = document.createElement("td");
     org.innerHTML = "SISEP"
 
     let dateEnd = document.createElement("td");
-    let dataEndPrep = new Date(Complaint.dataFim);
+    let dataEndPrep = new Date(Complaint.Content[0].datafinalizacao);
     let fullEndDate = `${dataEndPrep.getDate()}/${dataEndPrep.getMonth()}/${dataEndPrep.getFullYear()}`;
     dateEnd.innerHTML = fullEndDate;
 
     let status = document.createElement("td");
-    status.innerHTML = Complaint.status;
+    status.innerHTML = Complaint.Content[0].status;
 
     row.appendChild(dateSend);
     row.appendChild(protocol);
